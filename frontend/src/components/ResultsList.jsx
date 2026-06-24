@@ -40,7 +40,7 @@ export default function ResultsList() {
       <p className="results__count">{results.length} resultado(s) encontrado(s)</p>
       <div className="results__grid">
         {results.map((item) => {
-          const id = item.show?.id || item.person?.id;
+          const id = item.show.id;
           return <ShowCard key={id} item={item} />;
         })}
       </div>

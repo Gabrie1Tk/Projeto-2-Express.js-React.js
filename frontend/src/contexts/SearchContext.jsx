@@ -27,7 +27,7 @@ function searchReducer(state, action) {
 export function SearchProvider({ children }) {
   const [state, dispatch] = useReducer(searchReducer, initialState);
 
-  const searchShows = useCallback(async (query) => {
+  const searchShows = useCallback(async (query, type) => {
     dispatch({ type: "FETCH_START" });
     try {
       const url = `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`;
