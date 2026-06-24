@@ -1,4 +1,7 @@
 import { createContext, useContext, useReducer, useCallback } from "react";
+import { useAuth } from "./AuthContext";
+
+const RESOURCE_SERVICE_URL = "http://localhost:3002";
 
 export const SearchContext = createContext(null);
 
@@ -26,27 +29,50 @@ function searchReducer(state, action) {
 
 export function SearchProvider({ children }) {
   const [state, dispatch] = useReducer(searchReducer, initialState);
+  const { token } = useAuth();
 
-  const searchShows = useCallback(async (query, type) => {
+  const searchShows = useCallback(async (query) => {
     dispatch({ type: "FETCH_START" });
     try {
-      const url = `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`;
+      const params = query ? `?name=${encodeURIComponent(query)}` : "";
+      const res = await fetch(`${RESOURCE_SERVICE_URL}/shows${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Erro ao buscar dados.");
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Erro ao buscar dados.");
+      }
+
       const data = await res.json();
-      if (data.length === 0) throw new Error("Nenhum resultado encontrado.");
+
+      if (!data.length) throw new Error("Nenhum resultado encontrado.");
 
       dispatch({ type: "FETCH_SUCCESS", payload: data });
     } catch (err) {
       dispatch({ type: "FETCH_ERROR", payload: err.message });
     }
-  }, []);
+  }, [token]);
 
-  const clearResults = () => dispatch({ type: "CLEAR" });
+  const clearResults = useCallback(() => dispatch({ type: "CLEAR" }), []);
+
+  // Recarrega a lista atual (chamado após eventos WebSocket)
+  const refreshResults = useCallback(async () => {
+    if (!state.searched) return;
+    try {
+      const res = await fetch(`${RESOURCE_SERVICE_URL}/shows`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      dispatch({ type: "FETCH_SUCCESS", payload: data });
+    } catch {
+      // silencioso — não sobrescreve erro existente
+    }
+  }, [state.searched, token]);
 
   return (
-    <SearchContext.Provider value={{ state, searchShows, clearResults }}>
+    <SearchContext.Provider value={{ state, searchShows, clearResults, refreshResults }}>
       {children}
     </SearchContext.Provider>
   );
