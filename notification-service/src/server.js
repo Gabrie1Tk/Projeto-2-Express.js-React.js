@@ -1,7 +1,9 @@
-const express       = require('express')
-const http          = require('http')
+const express          = require('express')
+const http             = require('http')
 const { WebSocketServer } = require('ws')
-const cors          = require('cors')
+const cors             = require('cors')
+const compression      = require('compression')
+const morgan           = require('morgan')
 require('dotenv').config()
 
 const healthRoutes  = require('./routes/health')
@@ -12,7 +14,10 @@ const server = http.createServer(app)
 const wss    = new WebSocketServer({ server })
 
 app.use(cors())
+app.use(compression())
+app.use(morgan('[:date[iso]] :method :url :status :response-time ms'))
 app.use(express.json())
+
 app.use('/health', healthRoutes)
 
 wss.on('connection', (ws) => {
