@@ -190,19 +190,23 @@ npm run dev
 ## Estrutura de pastas
 
 ```
-projeto/
+Projeto-2-Express.js-React.js/
 ├── auth-service/
 │   ├── package.json
-│   ├── .env
+│   ├── package-lock.json
 │   └── src/
 │       ├── server.js
 │       ├── config/     (db.js, jwt.js)
 │       ├── models/     (User.js)
 │       └── routes/     (auth.js)
 │
+├── certs-base/
+│   ├── cert.pem
+│   └── key.pem
+│
 ├── resource-service/
 │   ├── package.json
-│   ├── .env
+│   ├── package-lock.json
 │   └── src/
 │       ├── server.js
 │       ├── config/     (db.js, redis.js)
@@ -211,7 +215,7 @@ projeto/
 │
 ├── notification-service/
 │   ├── package.json
-│   ├── .env
+│   ├── package-lock.json
 │   └── src/
 │       ├── server.js
 │       ├── config/     (redis.js)
@@ -226,5 +230,7 @@ projeto/
 │       ├── contexts/   (AuthContext, WebSocketContext, SearchContext)
 │       └── components/ (Login, Header, SearchBar, ShowCard, ShowForm, ConfirmModal, ResultsList)
 │
-└── README.md
+├── README.md
+└── gerar-certs.sh
+
 ```
