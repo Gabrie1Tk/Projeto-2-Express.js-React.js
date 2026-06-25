@@ -1,7 +1,8 @@
-const express = require('express')
-const jwt     = require('jsonwebtoken')
-const Show    = require('../models/Show')
-const redis   = require('../config/redis')
+const express                         = require('express')
+const jwt                             = require('jsonwebtoken')
+const { body, param, validationResult } = require('express-validator')
+const Show                            = require('../models/Show')
+const redis                           = require('../config/redis')
 require('dotenv').config()
 
 const router = express.Router()
@@ -24,11 +25,54 @@ const publishEvent = async (event, data) => {
   await redis.publish('shows-events', JSON.stringify({ event, data }))
 }
 
+// Regras de validação e sanitização para inserção e atualização
+const showRules = [
+  body('name')
+    .trim()
+    .escape()
+    .notEmpty().withMessage('Nome é obrigatório.')
+    .isLength({ max: 200 }).withMessage('Nome muito longo.'),
+  body('genres')
+    .optional()
+    .isArray().withMessage('Gêneros deve ser um array.'),
+  body('genres.*')
+    .trim()
+    .escape(),
+  body('status')
+    .optional()
+    .trim()
+    .escape()
+    .isIn(['Running', 'Ended', 'In Development'])
+    .withMessage('Status inválido.'),
+  body('premiered')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isDate({ format: 'YYYY-MM-DD' }).withMessage('Data deve estar no formato AAAA-MM-DD.'),
+  body('rating')
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0, max: 10 }).withMessage('Nota deve ser entre 0 e 10.'),
+  body('summary')
+    .optional()
+    .trim()
+    .escape()
+    .isLength({ max: 2000 }).withMessage('Descrição muito longa.'),
+  body('image')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isURL().withMessage('URL da imagem inválida.')
+]
+
+// Valida ObjectId do MongoDB no parâmetro :id
+const idRule = [
+  param('id')
+    .isMongoId().withMessage('ID inválido.')
+]
+
 // GET /shows — busca com cache
 router.get('/', authenticate, async (req, res) => {
   try {
-    const { q } = req.query
-    const cacheKey = `shows:${q || 'all'}`
+    const { name } = req.query
+    const cacheKey = `shows:${name || 'all'}`
 
     const cached = await redis.get(cacheKey)
     if (cached) {
@@ -36,11 +80,11 @@ router.get('/', authenticate, async (req, res) => {
       return res.json(JSON.parse(cached))
     }
 
-    const filter = q ? { name: { $regex: q, $options: 'i' } } : {}
+    const filter = name ? { name: { $regex: name, $options: 'i' } } : {}
     const shows = await Show.find(filter).sort({ createdAt: -1 })
 
     await redis.setEx(cacheKey, 30, JSON.stringify(shows))
-    console.log(`[resource-service] Busca: "${q || 'todos'}"`)
+    console.log(`[resource-service] Busca: "${name || 'todos'}"`)
     res.json(shows)
   } catch (err) {
     console.error('[resource-service] Erro na busca:', err.message)
@@ -49,11 +93,14 @@ router.get('/', authenticate, async (req, res) => {
 })
 
 // POST /shows — inserção
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, showRules, async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg })
+  }
+
   try {
     const { name, genres, status, premiered, rating, summary, image } = req.body
-
-    if (!name) return res.status(400).json({ error: 'Nome é obrigatório.' })
 
     const show = await Show.create({
       name, genres, status, premiered, rating, summary, image,
@@ -71,7 +118,12 @@ router.post('/', authenticate, async (req, res) => {
 })
 
 // PUT /shows/:id — atualização
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, idRule, showRules, async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg })
+  }
+
   try {
     const show = await Show.findById(req.params.id)
     if (!show) return res.status(404).json({ error: 'Show não encontrado.' })
@@ -81,7 +133,6 @@ router.put('/:id', authenticate, async (req, res) => {
     }
 
     const { name, genres, status, premiered, rating, summary, image } = req.body
-    if (!name) return res.status(400).json({ error: 'Nome é obrigatório.' })
 
     const updated = await Show.findByIdAndUpdate(
       req.params.id,
@@ -100,7 +151,12 @@ router.put('/:id', authenticate, async (req, res) => {
 })
 
 // DELETE /shows/:id — exclusão
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, idRule, async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg })
+  }
+
   try {
     const show = await Show.findById(req.params.id)
     if (!show) return res.status(404).json({ error: 'Show não encontrado.' })
