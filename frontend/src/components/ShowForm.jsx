@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import "./ShowForm.css";
 
-const RESOURCE_SERVICE_URL = "http://localhost:3002";
+const RESOURCE_SERVICE_URL = "https://localhost:3002";
 
 const EMPTY_FORM = {
   name: "",
