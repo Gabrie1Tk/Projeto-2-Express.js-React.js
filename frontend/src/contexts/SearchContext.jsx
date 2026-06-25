@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 
-const RESOURCE_SERVICE_URL = "http://localhost:3002";
+const RESOURCE_SERVICE_URL = "https://localhost:3002";
 
 export const SearchContext = createContext(null);
 

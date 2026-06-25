@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback } from "react";
 
-const AUTH_SERVICE_URL = "http://localhost:3001";
+const AUTH_SERVICE_URL = "https://localhost:3001";
 
 export const AuthContext = createContext(null);
 

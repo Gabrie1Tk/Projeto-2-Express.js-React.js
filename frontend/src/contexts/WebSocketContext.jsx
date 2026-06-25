@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 
-const WS_URL = "ws://localhost:3003";
+const WS_URL = "wss://localhost:3003";
 
 export const WebSocketContext = createContext(null);
 
