@@ -19,7 +19,7 @@ function ConfirmDeleteFlow({ show, onClose }) {
 
   const handleConfirm = async () => {
     try {
-      const res = await fetch(`http://localhost:3002/shows/${show._id}`, {
+      const res = await fetch(`https://localhost:3002/shows/${show._id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
