@@ -50,16 +50,6 @@
   margin-top: 6px;
 }
 
-.search-card__select {
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1.5px solid #334155;
-  background: #0f172a;
-  color: #f1f5f9;
-  font-size: 15px;
-  cursor: pointer;
-}
-
 .search-card__btn-search {
   padding: 12px 28px;
   border-radius: 10px;
@@ -76,6 +66,23 @@
   opacity: 0.85;
 }
 
+.search-card__btn-list {
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: 1.5px solid #6366f1;
+  background: transparent;
+  color: #818cf8;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.search-card__btn-list:hover {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+}
+
 .search-card__btn-clear {
   padding: 12px 20px;
   border-radius: 10px;
@@ -85,7 +92,7 @@
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
 
 .search-card__btn-clear:hover {

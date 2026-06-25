@@ -80,3 +80,42 @@
 .card__btn-expand:hover {
   color: #a5b4fc;
 }
+
+.card__owner-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid #334155;
+}
+
+.card__btn-edit,
+.card__btn-delete {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+  border: none;
+}
+
+.card__btn-edit {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.card__btn-edit:hover {
+  background: #2563eb;
+}
+
+.card__btn-delete {
+  background: rgba(220, 38, 38, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.card__btn-delete:hover {
+  background: rgba(220, 38, 38, 0.28);
+}
