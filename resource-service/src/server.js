@@ -1,4 +1,7 @@
 const express      = require('express')
+const https        = require('https')
+const fs           = require('fs')
+const path         = require('path')
 const cors         = require('cors')
 const helmet       = require('helmet')
 const compression  = require('compression')
@@ -25,6 +28,13 @@ app.get('/health', (req, res) => {
 })
 
 const PORT = process.env.PORT || 3002
-app.listen(PORT, () => {
-  console.log(`[resource-service] Rodando na porta ${PORT}`)
+
+const certPath = path.join(__dirname, '..', 'certs')
+const sslOptions = {
+  key:  fs.readFileSync(path.join(certPath, 'key.pem')),
+  cert: fs.readFileSync(path.join(certPath, 'cert.pem')),
+}
+
+https.createServer(sslOptions, app).listen(PORT, () => {
+  console.log(`[resource-service] Rodando em HTTPS na porta ${PORT}`)
 })
