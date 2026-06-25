@@ -1,9 +1,10 @@
-const express    = require('express')
-const bcrypt     = require('bcryptjs')
-const jwt        = require('jsonwebtoken')
-const rateLimit  = require('express-rate-limit')
-const User       = require('../models/User')
-const jwtConfig  = require('../config/jwt')
+const express                         = require('express')
+const bcrypt                          = require('bcryptjs')
+const jwt                             = require('jsonwebtoken')
+const rateLimit                       = require('express-rate-limit')
+const { body, validationResult }      = require('express-validator')
+const User                            = require('../models/User')
+const jwtConfig                       = require('../config/jwt')
 
 const router = express.Router()
 
@@ -13,14 +14,28 @@ const loginLimiter = rateLimit({
   message: { error: 'Muitas tentativas. Tente novamente em 15 minutos.' }
 })
 
+// Regras de validação e sanitização do login
+const loginRules = [
+  body('email')
+    .trim()
+    .notEmpty().withMessage('Email é obrigatório.')
+    .isEmail().withMessage('Email inválido.')
+    .normalizeEmail(),
+  body('password')
+    .trim()
+    .notEmpty().withMessage('Senha é obrigatória.')
+    .isLength({ min: 6 }).withMessage('Senha deve ter ao menos 6 caracteres.')
+]
+
 // POST /auth/login
-router.post('/login', loginLimiter, async (req, res) => {
+router.post('/login', loginLimiter, loginRules, async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg })
+  }
+
   try {
     const { email, password } = req.body
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email e senha são obrigatórios.' })
-    }
 
     const user = await User.findByEmail(email)
     if (!user) {
