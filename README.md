@@ -93,7 +93,7 @@ Projeto-2-Express.js-React.js/
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/LuizGustavo2105/Projeto-2-Express.js-React.js.git
+git clone https://github.com/Gabrie1Tk/Projeto-2-Express.js-React.js.git
 cd Projeto-2-Express.js-React.js
 ```
 
